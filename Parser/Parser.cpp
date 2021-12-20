@@ -34,8 +34,8 @@ Result p_letters(std::string input) {
 	return some(input, p_letter);
 }
 
-Result p_char(std::string input, std::string c) {
-	return parser(input, std::regex(c));
+Result p_char(std::string input, std::regex reg) {
+	return parser(input, reg);
 }
 
 Result some(std::string input, Result(*parser)(std::string)) {
@@ -62,7 +62,7 @@ Result sequence(std::string input, std::vector<Result(*)(std::string)> parsers) 
 
 		if (res.consumed.empty()) {
 			// return niks of foutmelding
-			return { cons, uncons };
+			return { "", input};
 		}
 
 		uncons = res.unconsumed;
@@ -72,6 +72,40 @@ Result sequence(std::string input, std::vector<Result(*)(std::string)> parsers) 
 
 	return { cons, uncons };
 }
+
+Result choice(std::string input, Result(*a)(std::string), Result(*b)(std::string)) {
+	Result res = (*a)(input);
+	if (res.consumed.empty()) {
+		res = (*b)(input);
+		return res;
+	}
+	else {
+		return res;
+	}
+}
+
+Result choice(std::string input, std::vector<Result(*)(std::string)> parsers, Result(*b)(std::string)) {
+	Result res = sequence(input, parsers);
+	if (res.consumed.empty()) {
+		res = (*b)(input);
+		return res;
+	}
+	else {
+		return res;
+	}
+}
+
+Result choice(std::string input, Result(*a)(std::string), std::vector<Result(*)(std::string)> parsers) {
+	Result res = (*a)(input);
+	if (res.consumed.empty()) {
+		res = sequence(input, parsers);
+		return res;
+	}
+	else {
+		return res;
+	}
+}
+
 
 void print_result(Result res) {
 	std::cout << "consumed: " << res.consumed << "\nunconsumed: " << res.unconsumed << std::endl;
