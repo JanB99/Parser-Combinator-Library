@@ -1,4 +1,4 @@
-# Parser-Combinator-Library
+# Parser Combinator
 
 A small Parser Combinator library written in c++ that includes the basic building blocks of parsing string input text.
 The library includes primitives like:
